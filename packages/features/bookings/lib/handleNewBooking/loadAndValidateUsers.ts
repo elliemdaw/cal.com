@@ -131,13 +131,27 @@ const _loadAndValidateUsers = async ({
   if (!users) throw new HttpError({ statusCode: 404, message: "eventTypeUser.notFound" });
 
   // Determine if users are locked
-  const containsBlockedUser = await checkIfUsersAreBlocked({
+  const blockedCheckResults = await checkIfUsersAreBlocked({
     users,
     organizationId: null,
     span: sentrySpan,
   });
 
-  if (containsBlockedUser) throw new HttpError({ statusCode: 404, message: "eventTypeUser.notFound" });
+  // Filter out the blocked users
+  const unblockedUsers = users.filter(
+    (u) => !blockedCheckResults.blockedUserIds?.includes(u.id)
+  );
+
+  // If ALL users are blocked → event is invalid
+  if (unblockedUsers.length === 0) {
+    throw new HttpError({
+      statusCode: 404,
+      message: "eventTypeUser.notFound",
+    });
+  }
+
+  // Otherwise: continue only with unblocked users
+  users = unblockedUsers;
 
   // map fixed users
   users = users.map((user) => ({
