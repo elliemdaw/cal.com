@@ -2814,8 +2814,7 @@ model BookingAudit {
   data Json?
 
   // Context for cross-cutting concerns like impersonation
-  // Example: { actingAsUserUuid: "uuid-of-impersonated-user" }
-  // This is separate from `data` because impersonation is orthogonal to the action type
+  // This is separate from `data` because it isn't related to action type but makes sense with every action
   context Json?
 
   @@index([actorId])
