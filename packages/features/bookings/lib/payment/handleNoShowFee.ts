@@ -8,7 +8,7 @@ import { MembershipRepository } from "@calcom/features/membership/repositories/M
 import { ErrorCode } from "@calcom/lib/errorCodes";
 import { ErrorWithCode } from "@calcom/lib/errors";
 import logger from "@calcom/lib/logger";
-import { getTranslation } from "@calcom/lib/server/i18n";
+import { getTranslation } from "@calcom/i18n/server";
 import prisma from "@calcom/prisma";
 import type { Prisma } from "@calcom/prisma/client";
 import type { CalendarEvent } from "@calcom/types/Calendar";
@@ -104,7 +104,8 @@ export const handleNoShowFee = async ({
   };
 
   if (teamId) {
-    const userIsInTeam = await MembershipRepository.findUniqueByUserIdAndTeamId({
+    const membershipRepository = new MembershipRepository();
+    const userIsInTeam = await membershipRepository.findUniqueByUserIdAndTeamId({
       userId,
       teamId,
     });
@@ -145,12 +146,12 @@ export const handleNoShowFee = async ({
     throw new Error("Payment app not implemented");
   }
   const paymentApp = await paymentAppImportFn;
-  if (!paymentApp?.PaymentService) {
+  if (!paymentApp?.BuildPaymentService) {
     log.error(`Payment service not found for app ${key}`);
     throw new Error("Payment service not found");
   }
-  const PaymentService = paymentApp.PaymentService;
-  const paymentInstance = new PaymentService(paymentCredential) as IAbstractPaymentService;
+  const createPaymentService = paymentApp.BuildPaymentService;
+  const paymentInstance = createPaymentService(paymentCredential) as IAbstractPaymentService;
 
   try {
     const paymentData = await paymentInstance.chargeCard(payment, booking.id);
@@ -164,11 +165,12 @@ export const handleNoShowFee = async ({
 
     return paymentData;
   } catch (err) {
-    let errorMessage = `Error processing paymentId ${payment.id} with error ${err}`;
     if (err instanceof ErrorWithCode && err.code === ErrorCode.ChargeCardFailure) {
-      errorMessage = err.message;
+      log.error(err.message);
+      throw err;
     }
 
+    const errorMessage = `Error processing paymentId ${payment.id} with error ${err}`;
     log.error(errorMessage);
     throw new Error(tOrganizer(errorMessage));
   }

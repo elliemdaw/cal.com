@@ -7,14 +7,13 @@
     "dev": "PORT=4321 next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "biome lint .",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@calcom/atoms": "workspace:*",
     "@prisma/client": "6.16.1",
-    "next": "16.1.0",
+    "next": "16.1.5",
     "prisma": "6.16.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -29,6 +28,6 @@
     "dotenv": "17.2.2",
     "postcss": "8.5.6",
     "tailwindcss": "4.1.17",
-    "typescript": "5.9.2"
+    "typescript": "5.9.3"
   }
 }

@@ -10,7 +10,7 @@ vi.mock("@calcom/features/ee/organizations/lib/getBookerUrlServer", () => ({
   getBookerBaseUrl: vi.fn(async () => "https://cal.com"),
 }));
 
-vi.mock("@calcom/lib/server/i18n", () => ({
+vi.mock("@calcom/i18n/server", () => ({
   getTranslation: vi.fn(async () => vi.fn(() => "translated")),
 }));
 
@@ -614,6 +614,81 @@ describe("CalendarEventBuilder", () => {
       expect(event.existingRecurringEvent).toEqual({
         recurringEventId: "recurring-123",
       });
+    }
+  });
+
+  it("should create an event with assignment reason", () => {
+    const event = new CalendarEventBuilder()
+      .withBasicDetails({
+        bookerUrl: "https://cal.com/user/test-slug",
+        title: "Test Event",
+        startTime: mockStartTime,
+        endTime: mockEndTime,
+      })
+      .withEventType({
+        slug: "test-slug",
+        id: 123,
+      })
+      .withAssignmentReason({
+        category: "routed",
+        details: "Language: English, Region: US",
+      })
+      .build();
+
+    expect(event).not.toBeNull();
+    if (event) {
+      expect(event.assignmentReason).toEqual({
+        category: "routed",
+        details: "Language: English, Region: US",
+      });
+    }
+  });
+
+  it("should create an event with assignment reason without details", () => {
+    const event = new CalendarEventBuilder()
+      .withBasicDetails({
+        bookerUrl: "https://cal.com/user/test-slug",
+        title: "Test Event",
+        startTime: mockStartTime,
+        endTime: mockEndTime,
+      })
+      .withEventType({
+        slug: "test-slug",
+        id: 123,
+      })
+      .withAssignmentReason({
+        category: "reassigned",
+        details: null,
+      })
+      .build();
+
+    expect(event).not.toBeNull();
+    if (event) {
+      expect(event.assignmentReason).toEqual({
+        category: "reassigned",
+        details: null,
+      });
+    }
+  });
+
+  it("should create an event with null assignment reason", () => {
+    const event = new CalendarEventBuilder()
+      .withBasicDetails({
+        bookerUrl: "https://cal.com/user/test-slug",
+        title: "Test Event",
+        startTime: mockStartTime,
+        endTime: mockEndTime,
+      })
+      .withEventType({
+        slug: "test-slug",
+        id: 123,
+      })
+      .withAssignmentReason(null)
+      .build();
+
+    expect(event).not.toBeNull();
+    if (event) {
+      expect(event.assignmentReason).toBeNull();
     }
   });
 

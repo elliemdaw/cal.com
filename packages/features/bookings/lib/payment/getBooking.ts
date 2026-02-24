@@ -5,7 +5,7 @@ import { getBookerBaseUrl } from "@calcom/features/ee/organizations/lib/getBooke
 import { HttpError as HttpCode } from "@calcom/lib/http-error";
 import { isPrismaObjOrUndefined } from "@calcom/lib/isPrismaObj";
 import { parseRecurringEvent } from "@calcom/lib/isRecurringEvent";
-import { getTranslation } from "@calcom/lib/server/i18n";
+import { getTranslation } from "@calcom/i18n/server";
 import { getTimeFormatStringFromUserTimeFormat } from "@calcom/lib/timeFormat";
 import { bookingMinimalSelect, prisma } from "@calcom/prisma";
 import { credentialForCalendarServiceSelect } from "@calcom/prisma/selects/credential";
@@ -72,6 +72,7 @@ export async function getBooking(bookingId: number) {
             },
           },
           slug: true,
+          schedulingType: true,
           workflows: {
             select: {
               workflow: {
@@ -87,6 +88,10 @@ export async function getBooking(bookingId: number) {
               parentId: true,
             },
           },
+          seatsPerTimeSlot: true,
+          seatsShowAttendees: true,
+          disableCancelling: true,
+          disableRescheduling: true,
         },
       },
       metadata: true,
@@ -195,6 +200,10 @@ export async function getBooking(bookingId: number) {
     destinationCalendar: selectedDestinationCalendar ? [selectedDestinationCalendar] : [],
     recurringEvent: parseRecurringEvent(eventType?.recurringEvent),
     customReplyToEmail: booking.eventType?.customReplyToEmail,
+    seatsPerTimeSlot: booking.eventType?.seatsPerTimeSlot,
+    seatsShowAttendees: booking.eventType?.seatsShowAttendees,
+    disableCancelling: booking.eventType?.disableCancelling ?? false,
+    disableRescheduling: booking.eventType?.disableRescheduling ?? false,
   };
 
   return {

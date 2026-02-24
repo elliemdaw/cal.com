@@ -1,15 +1,16 @@
 import { getCoreRowModel, getSortedRowModel, useReactTable, type ColumnDef } from "@tanstack/react-table";
 import { usePathname } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 
-import { DataTableProvider, DataTableWrapper } from "@calcom/features/data-table";
-import { useSegments } from "@calcom/features/data-table/hooks/useSegments";
+import { DataTableProvider } from "~/data-table/DataTableProvider";
+import { DataTableWrapper } from "~/data-table/components";
+import { useSegments } from "~/data-table/hooks/useSegments";
 import { useVoicePreview } from "@calcom/features/ee/workflows/hooks/useVoicePreview";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
 import { trpc } from "@calcom/trpc/react";
 import { Button } from "@calcom/ui/components/button";
 import { Dialog, DialogContent, DialogHeader } from "@calcom/ui/components/dialog";
-import { Icon } from "@calcom/ui/components/icon";
+import { PauseIcon, PlayIcon, UserIcon } from "@coss/ui/icons";
 import { showToast } from "@calcom/ui/components/toast";
 
 type Voice = {
@@ -58,10 +59,13 @@ function VoiceSelectionContent({
 
   const { data: voices, isLoading } = trpc.viewer.aiVoiceAgent.listVoices.useQuery();
 
-  const handleUseVoice = (voiceId: string) => {
-    onVoiceSelect(voiceId);
-    showToast("Voice selected successfully", "success");
-  };
+  const handleUseVoice = useCallback(
+    (voiceId: string) => {
+      onVoiceSelect(voiceId);
+      showToast("Voice selected successfully", "success");
+    },
+    [onVoiceSelect]
+  );
 
   const voiceData: Voice[] = useMemo(() => {
     if (!voices) return [];
@@ -85,14 +89,14 @@ function VoiceSelectionContent({
               onClick={() => handlePlayVoice(row.original.preview_audio_url, row.original.voice_id)}
               className="rounded-full">
               {playingVoiceId === row.original.voice_id ? (
-                <Icon name="pause" className="text-default h-3 w-3" />
+                <PauseIcon className="text-default h-3 w-3" />
               ) : (
-                <Icon name="play" className="text-default h-3 w-3" />
+                <PlayIcon className="text-default h-3 w-3" />
               )}
             </Button>
             <div className="flex items-center gap-2">
               <div className="bg-subtle flex h-10 w-10 items-center justify-center rounded-full">
-                <Icon name="user" className="text-default h-5 w-5" />
+                <UserIcon className="text-default h-5 w-5" />
               </div>
               <span className="text-emphasis font-medium">{row.original.voice_name}</span>
             </div>
@@ -105,7 +109,7 @@ function VoiceSelectionContent({
         header: t("trait"),
         size: 200,
         cell: ({ row }) => (
-          <div className="flex gap-2 text-sm">
+          <div className="flex flex-wrap gap-2 text-sm sm:flex-nowrap">
             {row.original.accent && (
               <span className="bg-subtle text-default rounded-md px-2 py-1 text-xs">
                 {row.original.accent}
@@ -145,12 +149,12 @@ function VoiceSelectionContent({
             color={selectedVoiceId === row.original.voice_id ? "primary" : "secondary"}
             onClick={() => handleUseVoice(row.original.voice_id)}
             className="whitespace-nowrap">
-            {selectedVoiceId === row.original.voice_id ? <>{t("current_voice")}</> : t("use_voice")}
+            {selectedVoiceId === row.original.voice_id ? t("current_voice") : t("use_voice")}
           </Button>
         ),
       },
     ],
-    [t, playingVoiceId, selectedVoiceId]
+    [t, playingVoiceId, selectedVoiceId, handlePlayVoice, handleUseVoice]
   );
 
   const table = useReactTable({
@@ -196,7 +200,7 @@ export function VoiceSelectionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent enableOverflow className="flex h-[80vh] flex-col p-6 sm:max-w-7xl">
+      <DialogContent enableOverflow size="md" className="flex flex-col p-6 sm:max-w-7xl">
         <DialogHeader title={t("select_voice")} subtitle={t("choose_a_voice_for_your_agent")} />
 
         <div className="mt-4 min-h-0 flex-1 overflow-hidden">

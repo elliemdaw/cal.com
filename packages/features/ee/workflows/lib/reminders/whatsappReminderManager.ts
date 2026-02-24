@@ -1,6 +1,6 @@
 import dayjs from "@calcom/dayjs";
 import logger from "@calcom/lib/logger";
-import { getTranslation } from "@calcom/lib/server/i18n";
+import { getTranslation } from "@calcom/i18n/server";
 import prisma from "@calcom/prisma";
 import {
   WorkflowTriggerEvents,
@@ -75,6 +75,17 @@ export const scheduleWhatsappReminder = async (args: ScheduleTextReminderArgs & 
     scheduledDate = timeSpan.time && timeUnit ? dayjs(startTime).subtract(timeSpan.time, timeUnit) : null;
   } else if (triggerEvent === WorkflowTriggerEvents.AFTER_EVENT) {
     scheduledDate = timeSpan.time && timeUnit ? dayjs(endTime).add(timeSpan.time, timeUnit) : null;
+  }
+
+  if (
+    scheduledDate &&
+    triggerEvent === WorkflowTriggerEvents.BEFORE_EVENT &&
+    dayjs(scheduledDate).isBefore(currentDate)
+  ) {
+    log.debug(
+      `Skipping reminder for workflow step ${workflowStepId} - scheduled date ${scheduledDate} is in the past`
+    );
+    return;
   }
 
   const name = action === WorkflowActions.WHATSAPP_ATTENDEE ? evt.attendees[0].name : evt.organizer.name;

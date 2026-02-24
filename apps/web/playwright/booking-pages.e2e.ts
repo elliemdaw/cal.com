@@ -1,12 +1,3 @@
-import { expect } from "@playwright/test";
-import { JSDOM } from "jsdom";
-
-import { WEBAPP_URL } from "@calcom/lib/constants";
-import { generateHashedLink } from "@calcom/lib/generateHashedLink";
-import { randomString } from "@calcom/lib/random";
-import { SchedulingType } from "@calcom/prisma/enums";
-import type { Schedule, TimeRange } from "@calcom/types/schedule";
-
 import { test, todo } from "./lib/fixtures";
 import {
   bookFirstEvent,
@@ -20,6 +11,13 @@ import {
   testName,
   cancelBookingFromBookingsList,
 } from "./lib/testUtils";
+import { WEBAPP_URL } from "@calcom/lib/constants";
+import { generateHashedLink } from "@calcom/lib/generateHashedLink";
+import { randomString } from "@calcom/lib/random";
+import { SchedulingType } from "@calcom/prisma/enums";
+import type { Schedule, TimeRange } from "@calcom/types/schedule";
+import { expect } from "@playwright/test";
+import { JSDOM } from "jsdom";
 
 const freeUserObj = { name: `Free-user-${randomString(3)}` };
 test.describe.configure({ mode: "parallel" });
@@ -488,9 +486,9 @@ test.describe("Booking on different layouts", () => {
 
     await page.click('[data-testid="toggle-group-item-column_view"]');
 
-    await page.click('[data-testid="incrementMonth"]');
-
-    await page.locator('[data-testid="time"]').nth(1).click();
+    // Use the standard helper to select an available time slot next month
+    // This is more robust than manually clicking incrementMonth and reloading
+    await selectFirstAvailableTimeSlotNextMonth(page);
 
     // Fill what is this meeting about? name email and notes
     await page.locator('[name="name"]').fill("Test name");
@@ -779,5 +777,57 @@ test.describe("Past booking cancellation", () => {
 
     await page.goto(`/booking/${booking.uid}`);
     await expect(page.locator('[data-testid="cancel"]')).toBeHidden();
+  });
+});
+
+test.describe("Optional Email Field Validation", () => {
+  test("should validate format if input is provided, but allow empty submission", async ({ page, users }) => {
+    const user = await users.create({
+      eventTypes: [
+        {
+          title: "Test Event",
+          slug: "test-event",
+          length: 30,
+          bookingFields: [
+            { name: "name", type: "name", required: true },
+            { name: "email", type: "email", required: true },
+            {
+              name: "altEmail",
+              type: "email",
+              required: false,
+              label: "Alternate Email",
+            },
+          ],
+        },
+      ],
+    });
+
+    await page.goto(`/${user.username}/test-event`);
+    await selectFirstAvailableTimeSlotNextMonth(page);
+
+    await page.locator('input[name="name"]').fill("Test Booker");
+    await page.locator('input[name="email"]').fill("booker@example.com");
+
+    const optionalField = page.getByLabel(/Alternate Email/i);
+
+    // Visibility
+    await expect(optionalField).toBeVisible();
+
+    // Trigger validation error
+    await optionalField.fill("not-an-email");
+    await page.click('[data-testid="confirm-book-button"]');
+
+    // Verify form didn't submit
+    await expect(page).not.toHaveURL(/.*isSuccessBookingPage=true.*/);
+
+    // Verify empty submission is allowed
+    await optionalField.fill("");
+
+    // Click the button to submit
+    await page.click('[data-testid="confirm-book-button"]');
+
+    // Verify it reached the end
+    await expect(page).toHaveURL(/.*isSuccessBookingPage=true.*/, { timeout: 15000 });
+    await expect(page.getByTestId("success-page")).toBeVisible();
   });
 });

@@ -1,9 +1,7 @@
-import { expect } from "@playwright/test";
-
 import { WEBAPP_URL } from "@calcom/lib/constants";
 import { prisma } from "@calcom/prisma";
 import { MembershipRole, SchedulingType } from "@calcom/prisma/enums";
-
+import { expect } from "@playwright/test";
 import { test } from "../lib/fixtures";
 import { localize } from "../lib/localize";
 import { getInviteLink } from "../lib/testUtils";
@@ -65,7 +63,10 @@ test.describe("Team", () => {
       // Check required fields
       await newPage.locator("input[name=password]").fill(`P4ssw0rd!`);
       await newPage.locator("button[type=submit]").click();
-      await newPage.waitForURL("/getting-started?from=signup");
+      await newPage.waitForURL((url) => {
+        const path = url.pathname;
+        return /\/(getting-started|onboarding\/(getting-started|personal\/settings))/.test(path);
+      });
       await newPage.close();
       await context.close();
 
@@ -74,7 +75,7 @@ test.describe("Team", () => {
       await page.goto(`/settings/teams/${team.id}/settings`);
       await expect(
         page.locator(`[data-testid="email-${invitedUserEmail.replace("@", "")}-pending"]`)
-      ).toHaveCount(0);
+      ).toHaveCount(0, { timeout: 0 });
     });
 
     await test.step("To the team by invite link", async () => {

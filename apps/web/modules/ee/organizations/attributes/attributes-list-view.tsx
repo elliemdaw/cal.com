@@ -3,7 +3,7 @@
 import type { Dispatch, SetStateAction } from "react";
 import { useState } from "react";
 
-import LicenseRequired from "@calcom/features/ee/common/components/LicenseRequired";
+import LicenseRequired from "~/ee/common/components/LicenseRequired";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
 import type { RouterOutputs } from "@calcom/trpc/react";
 import { trpc } from "@calcom/trpc/react";
@@ -17,7 +17,7 @@ import {
   DropdownMenuItem,
 } from "@calcom/ui/components/dropdown";
 import { Switch } from "@calcom/ui/components/form";
-import { Icon } from "@calcom/ui/components/icon";
+import { TagsIcon } from "@coss/ui/icons";
 import { showToast } from "@calcom/ui/components/toast";
 import { revalidateAttributesList } from "@calcom/web/app/(use-page-wrapper)/settings/organizations/(org-user-only)/members/actions";
 
@@ -179,7 +179,7 @@ function OrganizationAttributesPage({
         ) : (
           <div className="flex w-full flex-col items-center justify-center p-14">
             <div className="bg-emphasis text-emphasis flex h-16 w-16 items-center justify-center rounded-full p-2">
-              <Icon name="tags" />
+              <TagsIcon />
             </div>
             <h2 className="font-cal text-emphasis mt-6 text-xl font-semibold leading-none">
               {t("add_attributes")}

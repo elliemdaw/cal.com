@@ -4,7 +4,7 @@ import type { FormEvent } from "react";
 import { useMemo, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
-import TeamInviteFromOrg from "@calcom/ee/organizations/components/TeamInviteFromOrg";
+import TeamInviteFromOrg from "~/ee/organizations/components/TeamInviteFromOrg";
 import { checkAdminOrOwner } from "@calcom/features/auth/lib/checkAdminOrOwner";
 import { Dialog } from "@calcom/features/components/controlled-dialog";
 import type { PendingMember } from "@calcom/features/ee/teams/lib/types";
@@ -26,7 +26,7 @@ import { Label } from "@calcom/ui/components/form";
 import { TextField } from "@calcom/ui/components/form";
 import { Select } from "@calcom/ui/components/form";
 import { ToggleGroup } from "@calcom/ui/components/form";
-import { Icon } from "@calcom/ui/components/icon";
+import { BuildingIcon, UserIcon, UsersIcon } from "@coss/ui/icons";
 import { showToast } from "@calcom/ui/components/toast";
 import { revalidateTeamsList } from "@calcom/web/app/(use-page-wrapper)/(main-nav)/teams/actions";
 
@@ -121,15 +121,15 @@ export default function MemberInvitationModal(props: MemberInvitationModalProps)
       {
         value: "INDIVIDUAL",
         label: t("invite_team_individual_segment"),
-        iconLeft: <Icon name="user" />,
+        iconLeft: <UserIcon />,
       },
-      { value: "BULK", label: t("invite_team_bulk_segment"), iconLeft: <Icon name="users" /> },
+      { value: "BULK", label: t("invite_team_bulk_segment"), iconLeft: <UsersIcon /> },
     ];
     if (canSeeOrganization) {
       array.unshift({
         value: "ORGANIZATION",
         label: t("organization"),
-        iconLeft: <Icon name="building" />,
+        iconLeft: <BuildingIcon />,
       });
     }
     return array;
