@@ -17,9 +17,6 @@
     <br />
     <a href="https://github.com/calcom/cal.diy"><strong>GitHub</strong></a>
     <br />
-    <br />
-    <a href="https://github.com/calcom/cal.diy/discussions">Discussions</a>
-    &middot;
     <a href="https://github.com/calcom/cal.diy/issues">Issues</a>
     &middot;
     <a href="./CONTRIBUTING.md">Contributing</a>
@@ -71,7 +68,7 @@ To get a local copy up and running, please follow these simple steps.
 
 ### Prerequisites
 
-Here is what you need to be able to run Cal.diy.
+Here’s what you need to run Cal.diy.
 
 - Node.js (Version: >=18.x)
 - PostgreSQL (Version: >=13.x)
@@ -89,7 +86,8 @@ Here is what you need to be able to run Cal.diy.
    git clone https://github.com/calcom/cal.diy.git
    ```
 
-   > If you are on Windows, run the following command on `gitbash` with admin privileges: <br> > `git clone -c core.symlinks=true https://github.com/calcom/cal.diy.git` <br>
+   > If you are on Windows, run the following command in Git Bash with admin privileges:
+   > `git clone -c core.symlinks=true https://github.com/calcom/cal.diy.git`
 
 2. Go to the project folder
 
@@ -116,7 +114,7 @@ Here is what you need to be able to run Cal.diy.
  > rm packages/prisma/.env && cp .env packages/prisma/.env
  > ```
 
-5. Setup Node
+5. Set up Node
    If your Node version does not meet the project's requirements as instructed by the docs, "nvm" (Node Version Manager) allows using Node at the version required by the project:
 
    ```sh
@@ -201,7 +199,7 @@ for Logger level to be set at info, for example.
    <details>
    <summary>If you don't know how to configure the DATABASE_URL, then follow the steps here to create a quick local DB</summary>
 
-   1. [Download](https://www.postgresql.org/download/) and install postgres in your local (if you don't have it already).
+   1. [Download](https://www.postgresql.org/download/) and install PostgreSQL locally (if you don't have it already).
 
    2. Create your own local db by executing `createDB <DB name>`
 
@@ -216,6 +214,7 @@ for Logger level to be set at info, for example.
    </details>
 
    If you don't want to create a local DB. Then you can also consider using services like railway.app, Northflank or render.
+   
 
    - [Setup postgres DB with railway.app](https://docs.railway.app/guides/postgresql)
    - [Setup postgres DB with Northflank](https://northflank.com/guides/deploy-postgres-database-on-northflank)
@@ -237,6 +236,15 @@ for Logger level to be set at info, for example.
    yarn workspace @calcom/prisma db-deploy
    ```
 
+  **Note for Windows/PowerShell users:** If running the database deployment scripts fails with an error stating `Environment variable not found: DATABASE_DIRECT_URL`, Turbo might be failing to inject the root `.env` variables. You can bypass this by executing the commands directly from the prisma package directory in PowerShell:
+
+```powershell
+cd packages/prisma
+$env:DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/postgres"; $env:DATABASE_DIRECT_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/postgres"
+npx prisma db push
+cd ../..
+```
+   
 4. Run [mailhog](https://github.com/mailhog/MailHog) to view emails sent during development
 
    > **_NOTE:_** Required when `E2E_TEST_MAILHOG_ENABLED` is "1"
@@ -653,7 +661,7 @@ Unlike Cal.com's "Open Core" model, Cal.diy has **no commercial/enterprise code*
 
 ## Enabling Content Security Policy
 
-- Set CSP_POLICY="non-strict" env variable, which enables [Strict CSP](https://web.dev/strict-csp/) except for unsafe-inline in style-src . If you have some custom changes in your instance, you might have to make some code change to make your instance CSP compatible. Right now it enables strict CSP only on login page and on other SSR pages it is enabled in Report only mode to detect possible issues. On, SSG pages it is still not supported.
+- Set CSP_POLICY="non-strict" env variable, which enables [Strict CSP](https://web.dev/strict-csp/) except for `unsafe-inline` in `style-src`. If you have custom changes in your instance, you may need to modify your code to make it CSP-compatible. Currently, strict CSP is enabled only on the login page. On other SSR pages, it is enabled in report-only mode to detect potential issues. It is not yet supported on SSG pages.
 
 ## Integrations
 
@@ -673,8 +681,8 @@ Unlike Cal.com's "Open Core" model, Cal.diy has **no commercial/enterprise code*
 
 #### _Adding google calendar to Cal.diy App Store_
 
-After adding Google credentials, you can now Google Calendar App to the app store.
-You can repopulate the App store by running
+After adding Google credentials, you can now add the Google Calendar app to the App Store.
+You can repopulate the App Store by running
 
 ```
 cd packages/prisma
@@ -794,7 +802,6 @@ We welcome contributions! Whether it's fixing a typo, improving documentation, o
 > **Important:** Cal.diy is a community fork. Contributions to this repo do **not** flow to Cal.com's production platform. See [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
 
 - Check out our [Contributing Guide](./CONTRIBUTING.md) for detailed steps.
-- Join the discussion on [GitHub Discussions](https://github.com/calcom/cal.diy/discussions).
 - Please follow our coding standards and commit message conventions to keep the project consistent.
 
 Even small improvements matter — thank you for helping us grow!
@@ -815,7 +822,7 @@ We have a list of [help wanted](https://github.com/calcom/cal.diy/issues?q=is:is
 
 ### Translations
 
-Don't code but still want to contribute? Join our [Discussions](https://github.com/calcom/cal.diy/discussions) and help translate Cal.diy into your language.
+Don't code but still want to contribute? help translate Cal.diy into your language.
 
 <!-- ACKNOWLEDGEMENTS -->
 
